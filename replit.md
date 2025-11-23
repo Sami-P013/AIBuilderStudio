@@ -10,6 +10,15 @@ The application is designed with a mobile-first approach, drawing inspiration fr
 
 Preferred communication style: Simple, everyday language.
 
+## Recent Changes (November 23, 2025)
+
+- **Database Migration**: Switched from in-memory storage to PostgreSQL with Drizzle ORM for full data persistence
+- **Improved Error Handling**: Added graceful degradation for missing OpenAI API keys and GitHub integration failures
+- **Enhanced Validation**: PATCH endpoints now filter undefined values to prevent unintended database overwrites
+- **Database Seeding**: Templates automatically seed on startup with proper error handling to prevent crashes
+- **GitHub Resilience**: Returns empty arrays instead of 503 errors when GitHub is not connected
+- **Comprehensive Testing**: All core features tested end-to-end with Playwright (AI generation, projects, templates, resources, GitHub)
+
 ## System Architecture
 
 ### Frontend Architecture
