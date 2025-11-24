@@ -1,4 +1,4 @@
-import { type Project, type InsertProject, type Template, type InsertTemplate, projects, templates } from "@shared/schema";
+import { type Project, type InsertProject, type Template, type InsertTemplate, type ModelConfig, type InsertModelConfig, type MCPServer, type InsertMCPServer, type LibraryConfig, type InsertLibraryConfig, projects, templates, modelConfigs, mcpServers, libraryConfigs } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc } from "drizzle-orm";
 
@@ -14,6 +14,29 @@ export interface IStorage {
   getTemplates(): Promise<Template[]>;
   getTemplate(id: string): Promise<Template | undefined>;
   createTemplate(template: InsertTemplate): Promise<Template>;
+
+  // Model Configs
+  getModelConfigs(): Promise<ModelConfig[]>;
+  getModelConfig(id: string): Promise<ModelConfig | undefined>;
+  getActiveModelConfig(): Promise<ModelConfig | undefined>;
+  createModelConfig(config: InsertModelConfig): Promise<ModelConfig>;
+  updateModelConfig(id: string, config: Partial<InsertModelConfig>): Promise<ModelConfig | undefined>;
+  deleteModelConfig(id: string): Promise<boolean>;
+  setActiveModel(id: string): Promise<void>;
+
+  // MCP Servers
+  getMCPServers(): Promise<MCPServer[]>;
+  getMCPServer(id: string): Promise<MCPServer | undefined>;
+  createMCPServer(server: InsertMCPServer): Promise<MCPServer>;
+  updateMCPServer(id: string, server: Partial<InsertMCPServer>): Promise<MCPServer | undefined>;
+  deleteMCPServer(id: string): Promise<boolean>;
+
+  // Library Configs
+  getLibraryConfigs(): Promise<LibraryConfig[]>;
+  getLibraryConfig(id: string): Promise<LibraryConfig | undefined>;
+  createLibraryConfig(config: InsertLibraryConfig): Promise<LibraryConfig>;
+  updateLibraryConfig(id: string, config: Partial<InsertLibraryConfig>): Promise<LibraryConfig | undefined>;
+  deleteLibraryConfig(id: string): Promise<boolean>;
 }
 
 export class DbStorage implements IStorage {
@@ -59,6 +82,93 @@ export class DbStorage implements IStorage {
   async createTemplate(insertTemplate: InsertTemplate): Promise<Template> {
     const result = await db.insert(templates).values(insertTemplate).returning();
     return result[0];
+  }
+
+  // Model Configs
+  async getModelConfigs(): Promise<ModelConfig[]> {
+    return await db.select().from(modelConfigs).orderBy(desc(modelConfigs.createdAt));
+  }
+
+  async getModelConfig(id: string): Promise<ModelConfig | undefined> {
+    const result = await db.select().from(modelConfigs).where(eq(modelConfigs.id, id));
+    return result[0];
+  }
+
+  async getActiveModelConfig(): Promise<ModelConfig | undefined> {
+    const result = await db.select().from(modelConfigs).where(eq(modelConfigs.isActive, true));
+    return result[0];
+  }
+
+  async createModelConfig(insertConfig: InsertModelConfig): Promise<ModelConfig> {
+    const result = await db.insert(modelConfigs).values(insertConfig).returning();
+    return result[0];
+  }
+
+  async updateModelConfig(id: string, updates: Partial<InsertModelConfig>): Promise<ModelConfig | undefined> {
+    const result = await db.update(modelConfigs).set(updates).where(eq(modelConfigs.id, id)).returning();
+    return result[0];
+  }
+
+  async deleteModelConfig(id: string): Promise<boolean> {
+    const result = await db.delete(modelConfigs).where(eq(modelConfigs.id, id)).returning();
+    return result.length > 0;
+  }
+
+  async setActiveModel(id: string): Promise<void> {
+    // Deactivate all other models
+    await db.update(modelConfigs).set({ isActive: false }).where(eq(modelConfigs.isActive, true));
+    // Activate the selected model
+    await db.update(modelConfigs).set({ isActive: true }).where(eq(modelConfigs.id, id));
+  }
+
+  // MCP Servers
+  async getMCPServers(): Promise<MCPServer[]> {
+    return await db.select().from(mcpServers).orderBy(desc(mcpServers.createdAt));
+  }
+
+  async getMCPServer(id: string): Promise<MCPServer | undefined> {
+    const result = await db.select().from(mcpServers).where(eq(mcpServers.id, id));
+    return result[0];
+  }
+
+  async createMCPServer(insertServer: InsertMCPServer): Promise<MCPServer> {
+    const result = await db.insert(mcpServers).values(insertServer).returning();
+    return result[0];
+  }
+
+  async updateMCPServer(id: string, updates: Partial<InsertMCPServer>): Promise<MCPServer | undefined> {
+    const result = await db.update(mcpServers).set(updates).where(eq(mcpServers.id, id)).returning();
+    return result[0];
+  }
+
+  async deleteMCPServer(id: string): Promise<boolean> {
+    const result = await db.delete(mcpServers).where(eq(mcpServers.id, id)).returning();
+    return result.length > 0;
+  }
+
+  // Library Configs
+  async getLibraryConfigs(): Promise<LibraryConfig[]> {
+    return await db.select().from(libraryConfigs).orderBy(desc(libraryConfigs.createdAt));
+  }
+
+  async getLibraryConfig(id: string): Promise<LibraryConfig | undefined> {
+    const result = await db.select().from(libraryConfigs).where(eq(libraryConfigs.id, id));
+    return result[0];
+  }
+
+  async createLibraryConfig(insertConfig: InsertLibraryConfig): Promise<LibraryConfig> {
+    const result = await db.insert(libraryConfigs).values(insertConfig).returning();
+    return result[0];
+  }
+
+  async updateLibraryConfig(id: string, updates: Partial<InsertLibraryConfig>): Promise<LibraryConfig | undefined> {
+    const result = await db.update(libraryConfigs).set(updates).where(eq(libraryConfigs.id, id)).returning();
+    return result[0];
+  }
+
+  async deleteLibraryConfig(id: string): Promise<boolean> {
+    const result = await db.delete(libraryConfigs).where(eq(libraryConfigs.id, id)).returning();
+    return result.length > 0;
   }
 }
 

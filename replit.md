@@ -10,14 +10,15 @@ The application is designed with a mobile-first approach, drawing inspiration fr
 
 Preferred communication style: Simple, everyday language.
 
-## Recent Changes (November 23, 2025)
+## Recent Changes (November 24, 2025)
 
-- **Database Migration**: Switched from in-memory storage to PostgreSQL with Drizzle ORM for full data persistence
-- **Improved Error Handling**: Added graceful degradation for missing OpenAI API keys and GitHub integration failures
-- **Enhanced Validation**: PATCH endpoints now filter undefined values to prevent unintended database overwrites
-- **Database Seeding**: Templates automatically seed on startup with proper error handling to prevent crashes
-- **GitHub Resilience**: Returns empty arrays instead of 503 errors when GitHub is not connected
-- **Comprehensive Testing**: All core features tested end-to-end with Playwright (AI generation, projects, templates, resources, GitHub)
+- **Multi-Model Support**: Added support for OpenAI, Anthropic Claude, Google Gemini, and OpenRouter models
+- **MCP Integration**: Added Model Context Protocol (MCP) server configuration for extended capabilities
+- **Library Management**: Created system for managing npm packages, APIs, and service integrations
+- **Settings Page**: New Settings page allows users to select preferred AI models and manage integrations
+- **Visual Enhancements**: Vibrant color scheme with 100% saturation, card hover effects, gradient text headings
+- **Guides Section**: Comprehensive learning guides for building different project types with integrated tools
+- **Database Schema**: Added tables for ModelConfig, MCPServer, and LibraryConfig with full CRUD operations
 
 ## System Architecture
 
@@ -46,11 +47,14 @@ Preferred communication style: Simple, everyday language.
 - Theme management via React Context API
 
 **Key Features**
-- AI code generator with real-time preview
+- AI code generator with multi-model support and real-time preview
 - Project management (CRUD operations for user-generated projects)
 - Template library with categorization and filtering
+- Comprehensive learning guides for different project types
 - Curated resources directory for free development tools
 - GitHub repository integration and synchronization
+- Settings page for AI model selection and integration management
+- Support for MCP servers and library/API integrations
 
 ### Backend Architecture
 
@@ -66,9 +70,11 @@ Preferred communication style: Simple, everyday language.
 - GitHub API routes for repository management
 
 **AI Integration**
-- OpenAI GPT-5 API for code generation
+- Multi-model support: OpenAI, Anthropic Claude, Google Gemini, OpenRouter
+- Uses Replit AI Integrations for seamless model access without separate API keys
 - Context-aware system prompts tailored to project types (website, webapp, chatbot, ai-agent)
 - Configurable token limits (4096 max completion tokens)
+- Support for Model Context Protocol (MCP) servers for extended tool capabilities
 
 **Session & Request Handling**
 - JSON body parsing with raw body preservation for webhook verification

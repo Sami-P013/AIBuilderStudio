@@ -12,6 +12,7 @@ import Projects from "@/pages/projects";
 import Templates from "@/pages/templates";
 import Resources from "@/pages/resources";
 import Guides from "@/pages/guides";
+import Settings from "@/pages/settings";
 import GitHubPage from "@/pages/github";
 import NotFound from "@/pages/not-found";
 
@@ -23,6 +24,7 @@ function Router() {
       <Route path="/templates" component={Templates} />
       <Route path="/resources" component={Resources} />
       <Route path="/guides" component={Guides} />
+      <Route path="/settings" component={Settings} />
       <Route path="/github" component={GitHubPage} />
       <Route component={NotFound} />
     </Switch>
