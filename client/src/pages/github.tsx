@@ -27,17 +27,12 @@ export default function GitHubPage() {
 
   return (
     <div className="h-full flex flex-col overflow-hidden">
-      <div className="flex-none border-b p-4 md:p-6">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div>
-            <h1 className="text-2xl md:text-3xl font-bold flex items-center gap-2">
-              <Github className="h-6 w-6 md:h-8 md:w-8 text-primary" />
-              GitHub Integration
-            </h1>
-            <p className="text-sm text-muted-foreground mt-1">
-              Manage your repositories and sync your projects
-            </p>
-          </div>
+      <div className="flex-none gradient-hero">
+        <div className="p-4 md:p-5">
+          <h1 className="text-2xl md:text-3xl font-semibold flex items-center gap-2 text-foreground">
+            <Github className="h-5 w-5 md:h-6 md:w-6 text-primary" />
+            GitHub Integration
+          </h1>
         </div>
       </div>
 

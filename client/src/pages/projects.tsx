@@ -66,16 +66,13 @@ export default function Projects() {
 
   return (
     <div className="h-full flex flex-col overflow-hidden">
-      <div className="flex-none gradient-hero border-b">
-        <div className="p-6 md:p-8 flex flex-col md:flex-row md:items-center justify-between gap-4 relative z-10">
+      <div className="flex-none gradient-hero">
+        <div className="p-4 md:p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 relative z-10">
           <div>
-            <h1 className="text-4xl md:text-5xl font-bold flex items-center gap-3 mb-2 text-white">
-              <FolderOpen className="h-8 w-8 md:h-10 md:w-10" />
+            <h1 className="text-2xl md:text-3xl font-semibold flex items-center gap-2 text-foreground">
+              <FolderOpen className="h-5 w-5 md:h-6 md:w-6 text-primary" />
               My Projects
             </h1>
-            <p className="text-base md:text-lg text-white/90">
-              View and manage all your AI-generated projects
-            </p>
           </div>
           <Link href="/">
             <Button data-testid="button-new-project">

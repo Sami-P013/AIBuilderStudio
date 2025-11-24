@@ -195,17 +195,12 @@ export default function Resources() {
 
   return (
     <div className="h-full flex flex-col overflow-hidden">
-      <div className="flex-none border-b p-4 md:p-6">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div>
-            <h1 className="text-4xl md:text-5xl font-bold flex items-center gap-3 mb-2 text-white">
-              <BookOpen className="h-8 w-8 md:h-10 md:w-10" />
-              Free Resources
-            </h1>
-            <p className="text-base md:text-lg text-white/90">
-              Curated collection of free tools to build and deploy your projects
-            </p>
-          </div>
+      <div className="flex-none gradient-hero">
+        <div className="p-4 md:p-5">
+          <h1 className="text-2xl md:text-3xl font-semibold flex items-center gap-2 text-foreground">
+            <BookOpen className="h-5 w-5 md:h-6 md:w-6 text-primary" />
+            Free Resources
+          </h1>
         </div>
       </div>
 

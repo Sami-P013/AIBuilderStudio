@@ -25,13 +25,13 @@ export default function AIGenerator() {
       if (!prompt.trim()) {
         throw new Error("Please enter a prompt");
       }
-      const response = await apiRequest<{ code: string }>("POST", "/api/generate", {
+      const response = await apiRequest("POST", "/api/generate", {
         prompt,
         type: projectType,
       });
-      return response;
+      return response as { code: string };
     },
-    onSuccess: (data) => {
+    onSuccess: (data: { code: string }) => {
       setGeneratedCode(data.code);
       toast({
         title: "Code generated successfully!",
@@ -108,15 +108,12 @@ export default function AIGenerator() {
 
   return (
     <div className="h-full flex flex-col overflow-hidden">
-      <div className="flex-none gradient-hero border-b">
-        <div className="p-6 md:p-8 relative z-10">
-          <h1 className="text-4xl md:text-5xl font-bold flex items-center gap-3 mb-2 text-white">
-            <Sparkles className="h-8 w-8 md:h-10 md:w-10" />
+      <div className="flex-none gradient-hero">
+        <div className="p-4 md:p-5 relative z-10">
+          <h1 className="text-2xl md:text-3xl font-semibold flex items-center gap-2 text-foreground">
+            <Sparkles className="h-5 w-5 md:h-6 md:w-6 text-primary" />
             Create with AI
           </h1>
-          <p className="text-base md:text-lg text-white/90">
-            Build amazing websites and applications with natural language
-          </p>
         </div>
       </div>
 
