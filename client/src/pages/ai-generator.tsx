@@ -28,8 +28,8 @@ export default function AIGenerator() {
       const response = await apiRequest("POST", "/api/generate", {
         prompt,
         type: projectType,
-      });
-      return response as { code: string };
+      }) as unknown as { code: string };
+      return response;
     },
     onSuccess: (data: { code: string }) => {
       setGeneratedCode(data.code);
