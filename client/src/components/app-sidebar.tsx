@@ -1,4 +1,4 @@
-import { Code2, FolderOpen, Layout, Github, BookOpen, Sparkles } from "lucide-react";
+import { Code2, FolderOpen, Layout, Github, BookOpen, Sparkles, Lightbulb } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -26,6 +26,11 @@ const menuItems = [
     title: "Templates",
     url: "/templates",
     icon: Layout,
+  },
+  {
+    title: "Guides",
+    url: "/guides",
+    icon: Lightbulb,
   },
   {
     title: "Resources",
