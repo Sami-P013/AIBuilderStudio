@@ -108,17 +108,15 @@ export default function AIGenerator() {
 
   return (
     <div className="h-full flex flex-col overflow-hidden">
-      <div className="flex-none border-b p-4 md:p-6">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div>
-            <h1 className="text-2xl md:text-3xl font-bold flex items-center gap-2">
-              <Sparkles className="h-6 w-6 md:h-8 md:w-8 text-primary" />
-              AI Code Generator
-            </h1>
-            <p className="text-sm text-muted-foreground mt-1">
-              Describe what you want to build and let AI create it for you
-            </p>
-          </div>
+      <div className="flex-none gradient-hero border-b">
+        <div className="p-6 md:p-8 relative z-10">
+          <h1 className="text-4xl md:text-5xl font-bold flex items-center gap-3 mb-2 text-white">
+            <Sparkles className="h-8 w-8 md:h-10 md:w-10" />
+            Create with AI
+          </h1>
+          <p className="text-base md:text-lg text-white/90">
+            Build amazing websites and applications with natural language
+          </p>
         </div>
       </div>
 
