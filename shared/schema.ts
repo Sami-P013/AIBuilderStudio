@@ -1,11 +1,30 @@
 import { sql } from "drizzle-orm";
-import { pgTable, text, varchar, timestamp, jsonb, boolean } from "drizzle-orm/pg-core";
+import { pgTable, text, varchar, timestamp, jsonb, boolean, uuid } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
+
+// Users table - stores authenticated users
+export const users = pgTable("users", {
+  id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
+  username: text("username").unique(),
+  email: text("email").unique(),
+  displayName: text("display_name"),
+  avatar: text("avatar"), // URL to avatar image
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export const insertUserSchema = createInsertSchema(users).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type InsertUser = z.infer<typeof insertUserSchema>;
+export type User = typeof users.$inferSelect;
 
 // Projects table - stores user's AI-generated projects
 export const projects = pgTable("projects", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: uuid("user_id").references(() => users.id, { onDelete: "cascade" }),
   name: text("name").notNull(),
   description: text("description"),
   type: text("type").notNull(), // 'website', 'webapp', 'chatbot', 'ai-agent'
@@ -23,6 +42,7 @@ export const insertProjectSchema = createInsertSchema(projects).omit({
   id: true,
   createdAt: true,
   lastModified: true,
+  userId: true,
 });
 
 export type InsertProject = z.infer<typeof insertProjectSchema>;
@@ -33,7 +53,7 @@ export const templates = pgTable("templates", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   name: text("name").notNull(),
   description: text("description").notNull(),
-  category: text("category").notNull(), // 'landing', 'saas', 'blog', 'ecommerce', 'chatbot', 'ai-agent'
+  category: text("category").notNull(), // 'landing', 'saas', 'blog', 'ecommerce', 'chatbot', 'ai-agent', 'mobile'
   code: text("code").notNull(),
   language: text("language").notNull().default('html'),
   techStack: text("tech_stack").array().notNull().default(sql`ARRAY[]::text[]`),
@@ -52,6 +72,7 @@ export type Template = typeof templates.$inferSelect;
 // Model Configuration table - stores user's selected models and connectors
 export const modelConfigs = pgTable("model_configs", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: uuid("user_id").references(() => users.id, { onDelete: "cascade" }),
   name: text("name").notNull(), // 'openai', 'claude', 'gemini', 'groq', 'custom'
   provider: text("provider").notNull(), // 'openai', 'anthropic', 'google', 'openrouter', 'custom'
   modelId: text("model_id").notNull(), // 'gpt-4', 'claude-3-opus', 'gemini-2.5-pro', etc
@@ -65,6 +86,7 @@ export const modelConfigs = pgTable("model_configs", {
 export const insertModelConfigSchema = createInsertSchema(modelConfigs).omit({
   id: true,
   createdAt: true,
+  userId: true,
 });
 
 export type InsertModelConfig = z.infer<typeof insertModelConfigSchema>;
@@ -73,6 +95,7 @@ export type ModelConfig = typeof modelConfigs.$inferSelect;
 // MCP Server Configuration table - stores user's MCP (Model Context Protocol) servers
 export const mcpServers = pgTable("mcp_servers", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: uuid("user_id").references(() => users.id, { onDelete: "cascade" }),
   name: text("name").notNull(), // User-defined name
   type: text("type").notNull(), // 'stdio', 'sse', 'custom'
   command: text("command"), // For stdio MCPs: the command to execute
@@ -86,6 +109,7 @@ export const mcpServers = pgTable("mcp_servers", {
 export const insertMCPServerSchema = createInsertSchema(mcpServers).omit({
   id: true,
   createdAt: true,
+  userId: true,
 });
 
 export type InsertMCPServer = z.infer<typeof insertMCPServerSchema>;
@@ -94,6 +118,7 @@ export type MCPServer = typeof mcpServers.$inferSelect;
 // Library Configuration table - stores user's integrated libraries and tools
 export const libraryConfigs = pgTable("library_configs", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: uuid("user_id").references(() => users.id, { onDelete: "cascade" }),
   name: text("name").notNull(), // Library name
   type: text("type").notNull(), // 'npm-package', 'python-package', 'api', 'service'
   packageName: text("package_name"), // For packages: the actual package name
@@ -107,6 +132,7 @@ export const libraryConfigs = pgTable("library_configs", {
 export const insertLibraryConfigSchema = createInsertSchema(libraryConfigs).omit({
   id: true,
   createdAt: true,
+  userId: true,
 });
 
 export type InsertLibraryConfig = z.infer<typeof insertLibraryConfigSchema>;

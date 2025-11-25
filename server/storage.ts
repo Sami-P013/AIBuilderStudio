@@ -1,12 +1,19 @@
-import { type Project, type InsertProject, type Template, type InsertTemplate, type ModelConfig, type InsertModelConfig, type MCPServer, type InsertMCPServer, type LibraryConfig, type InsertLibraryConfig, projects, templates, modelConfigs, mcpServers, libraryConfigs } from "@shared/schema";
+import { type User, type InsertUser, type Project, type InsertProject, type Template, type InsertTemplate, type ModelConfig, type InsertModelConfig, type MCPServer, type InsertMCPServer, type LibraryConfig, type InsertLibraryConfig, users, projects, templates, modelConfigs, mcpServers, libraryConfigs } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc } from "drizzle-orm";
 
 export interface IStorage {
-  // Projects
+  // Users
+  getUser(id: string): Promise<User | undefined>;
+  getUserByEmail(email: string): Promise<User | undefined>;
+  createUser(user: InsertUser): Promise<User>;
+  updateUser(id: string, user: Partial<InsertUser>): Promise<User | undefined>;
+
+  // Projects (deprecated - keeping for backwards compatibility)
   getProjects(): Promise<Project[]>;
+  getProjectsByUser(userId: string): Promise<Project[]>;
   getProject(id: string): Promise<Project | undefined>;
-  createProject(project: InsertProject): Promise<Project>;
+  createProject(userId?: string, project?: InsertProject): Promise<Project>;
   updateProject(id: string, project: Partial<InsertProject>): Promise<Project | undefined>;
   deleteProject(id: string): Promise<boolean>;
 
@@ -40,9 +47,30 @@ export interface IStorage {
 }
 
 export class DbStorage implements IStorage {
+  // Users
+  async getUser(id: string): Promise<User | undefined> {
+    const result = await db.select().from(users).where(eq(users.id, id));
+    return result[0];
+  }
+
+  async getUserByEmail(email: string): Promise<User | undefined> {
+    const result = await db.select().from(users).where(eq(users.email, email));
+    return result[0];
+  }
+
+  async createUser(insertUser: InsertUser): Promise<User> {
+    const result = await db.insert(users).values(insertUser).returning();
+    return result[0];
+  }
+
+  async updateUser(id: string, updates: Partial<InsertUser>): Promise<User | undefined> {
+    const result = await db.update(users).set(updates).where(eq(users.id, id)).returning();
+    return result[0];
+  }
+
   // Projects
-  async getProjects(): Promise<Project[]> {
-    return await db.select().from(projects).orderBy(desc(projects.lastModified));
+  async getProjectsByUser(userId: string): Promise<Project[]> {
+    return await db.select().from(projects).where(eq(projects.userId, userId)).orderBy(desc(projects.lastModified));
   }
 
   async getProject(id: string): Promise<Project | undefined> {
@@ -50,8 +78,19 @@ export class DbStorage implements IStorage {
     return result[0];
   }
 
-  async createProject(insertProject: InsertProject): Promise<Project> {
-    const result = await db.insert(projects).values(insertProject).returning();
+  async createProject(userIdOrProject?: string | InsertProject, projectData?: InsertProject): Promise<Project> {
+    // Handle both old (project only) and new (userId, project) signatures
+    let userId: string | undefined;
+    let insertProject: InsertProject;
+    
+    if (typeof userIdOrProject === 'string') {
+      userId = userIdOrProject;
+      insertProject = projectData!;
+    } else {
+      insertProject = userIdOrProject || projectData!;
+    }
+    
+    const result = await db.insert(projects).values({ ...insertProject, ...(userId && { userId: userId as any }) }).returning();
     return result[0];
   }
 
@@ -100,12 +139,12 @@ export class DbStorage implements IStorage {
   }
 
   async createModelConfig(insertConfig: InsertModelConfig): Promise<ModelConfig> {
-    const result = await db.insert(modelConfigs).values(insertConfig).returning();
+    const result = await db.insert(modelConfigs).values(insertConfig as any).returning();
     return result[0];
   }
 
   async updateModelConfig(id: string, updates: Partial<InsertModelConfig>): Promise<ModelConfig | undefined> {
-    const result = await db.update(modelConfigs).set(updates).where(eq(modelConfigs.id, id)).returning();
+    const result = await db.update(modelConfigs).set(updates as any).where(eq(modelConfigs.id, id)).returning();
     return result[0];
   }
 
@@ -132,12 +171,12 @@ export class DbStorage implements IStorage {
   }
 
   async createMCPServer(insertServer: InsertMCPServer): Promise<MCPServer> {
-    const result = await db.insert(mcpServers).values(insertServer).returning();
+    const result = await db.insert(mcpServers).values(insertServer as any).returning();
     return result[0];
   }
 
   async updateMCPServer(id: string, updates: Partial<InsertMCPServer>): Promise<MCPServer | undefined> {
-    const result = await db.update(mcpServers).set(updates).where(eq(mcpServers.id, id)).returning();
+    const result = await db.update(mcpServers).set(updates as any).where(eq(mcpServers.id, id)).returning();
     return result[0];
   }
 
@@ -157,12 +196,12 @@ export class DbStorage implements IStorage {
   }
 
   async createLibraryConfig(insertConfig: InsertLibraryConfig): Promise<LibraryConfig> {
-    const result = await db.insert(libraryConfigs).values(insertConfig).returning();
+    const result = await db.insert(libraryConfigs).values(insertConfig as any).returning();
     return result[0];
   }
 
   async updateLibraryConfig(id: string, updates: Partial<InsertLibraryConfig>): Promise<LibraryConfig | undefined> {
-    const result = await db.update(libraryConfigs).set(updates).where(eq(libraryConfigs.id, id)).returning();
+    const result = await db.update(libraryConfigs).set(updates as any).where(eq(libraryConfigs.id, id)).returning();
     return result[0];
   }
 

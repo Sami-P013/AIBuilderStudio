@@ -7,6 +7,61 @@ import { insertProjectSchema } from "@shared/schema";
 import { z } from "zod";
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Authentication
+  app.post("/api/auth/signup", async (req, res) => {
+    try {
+      const { email, password, displayName } = req.body;
+      
+      if (!email || !password) {
+        return res.status(400).json({ error: "Email and password required" });
+      }
+
+      const existingUser = await storage.getUserByEmail(email);
+      if (existingUser) {
+        return res.status(400).json({ error: "Email already registered" });
+      }
+
+      const user = await storage.createUser({
+        email,
+        displayName: displayName || email.split("@")[0],
+        username: email.split("@")[0],
+      });
+
+      res.status(201).json(user);
+    } catch (error: any) {
+      console.error("Signup error:", error);
+      res.status(500).json({ error: error.message || "Signup failed" });
+    }
+  });
+
+  app.post("/api/auth/login", async (req, res) => {
+    try {
+      const { email, password } = req.body;
+      
+      if (!email || !password) {
+        return res.status(400).json({ error: "Email and password required" });
+      }
+
+      const user = await storage.getUserByEmail(email);
+      if (!user) {
+        return res.status(401).json({ error: "Invalid credentials" });
+      }
+
+      res.json(user);
+    } catch (error: any) {
+      console.error("Login error:", error);
+      res.status(500).json({ error: error.message || "Login failed" });
+    }
+  });
+
+  app.get("/api/auth/me", async (req, res) => {
+    try {
+      res.json(null);
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
   // AI Code Generation
   app.post("/api/generate", async (req, res) => {
     try {
