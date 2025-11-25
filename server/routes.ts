@@ -16,6 +16,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "Email and password required" });
       }
 
+      if (password.length < 6) {
+        return res.status(400).json({ error: "Password must be at least 6 characters" });
+      }
+
       const existingUser = await storage.getUserByEmail(email);
       if (existingUser) {
         return res.status(400).json({ error: "Email already registered" });
@@ -23,10 +27,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const user = await storage.createUser({
         email,
+        password,
         displayName: displayName || email.split("@")[0],
-        username: email.split("@")[0],
+        username: email.split("@")[0] + "_" + Math.random().toString(36).substring(7),
       });
 
+      req.session = { userId: user.id };
       res.status(201).json(user);
     } catch (error: any) {
       console.error("Signup error:", error);
@@ -47,7 +53,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ error: "Invalid credentials" });
       }
 
-      res.json(user);
+      const bcrypt = await import("bcryptjs");
+      const isValid = await bcrypt.compare(password, user.passwordHash);
+      if (!isValid) {
+        return res.status(401).json({ error: "Invalid credentials" });
+      }
+
+      const { passwordHash: _, ...userWithoutPassword } = user;
+      req.session = { userId: user.id };
+      res.json(userWithoutPassword);
     } catch (error: any) {
       console.error("Login error:", error);
       res.status(500).json({ error: error.message || "Login failed" });
@@ -56,7 +70,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/auth/me", async (req, res) => {
     try {
-      res.json(null);
+      if (!req.session?.userId) {
+        return res.json(null);
+      }
+
+      const user = await storage.getUserById(req.session.userId);
+      if (!user) {
+        req.session = null;
+        return res.json(null);
+      }
+
+      const { passwordHash: _, ...userWithoutPassword } = user;
+      res.json(userWithoutPassword);
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  app.post("/api/auth/logout", async (req, res) => {
+    try {
+      req.session = null;
+      res.status(204).send();
     } catch (error: any) {
       res.status(500).json({ error: error.message });
     }

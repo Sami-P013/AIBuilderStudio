@@ -1,6 +1,7 @@
 import { type User, type InsertUser, type Project, type InsertProject, type Template, type InsertTemplate, type ModelConfig, type InsertModelConfig, type MCPServer, type InsertMCPServer, type LibraryConfig, type InsertLibraryConfig, users, projects, templates, modelConfigs, mcpServers, libraryConfigs } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc } from "drizzle-orm";
+import bcrypt from "bcryptjs";
 
 export interface IStorage {
   // Users
@@ -82,14 +83,14 @@ export class DbStorage implements IStorage {
     // Handle both old (project only) and new (userId, project) signatures
     let userId: string | undefined;
     let insertProject: InsertProject;
-    
+
     if (typeof userIdOrProject === 'string') {
       userId = userIdOrProject;
       insertProject = projectData!;
     } else {
       insertProject = userIdOrProject || projectData!;
     }
-    
+
     const result = await db.insert(projects).values({ ...insertProject, ...(userId && { userId: userId as any }) }).returning();
     return result[0];
   }
@@ -253,7 +254,7 @@ async function seedTemplates() {
 <body>
   <div class="hero">
     <h1>Build Something Amazing</h1>
-    <p>The fastest way to launch your next project</p>
+    <p>The fastest way to launch your project</p>
     <button class="btn">Get Started</button>
   </div>
   <div class="features">
