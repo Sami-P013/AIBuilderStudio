@@ -132,9 +132,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/projects/:id", async (req, res) => {
     try {
+      if (!req.session?.userId) {
+        return res.status(401).json({ error: "Authentication required" });
+      }
       const project = await storage.getProject(req.params.id);
       if (!project) {
         return res.status(404).json({ error: "Project not found" });
+      }
+      if (project.userId !== req.session.userId) {
+        return res.status(403).json({ error: "Access denied" });
       }
       res.json(project);
     } catch (error: any) {
@@ -160,6 +166,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.patch("/api/projects/:id", async (req, res) => {
     try {
+      if (!req.session?.userId) {
+        return res.status(401).json({ error: "Authentication required" });
+      }
+
+      // Verify project exists and user owns it
+      const existingProject = await storage.getProject(req.params.id);
+      if (!existingProject) {
+        return res.status(404).json({ error: "Project not found" });
+      }
+      if (existingProject.userId !== req.session.userId) {
+        return res.status(403).json({ error: "Access denied" });
+      }
+
       // Ensure request body is not empty
       if (!req.body || Object.keys(req.body).length === 0) {
         return res.status(400).json({ error: "Update data is required" });
@@ -193,6 +212,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.delete("/api/projects/:id", async (req, res) => {
     try {
+      if (!req.session?.userId) {
+        return res.status(401).json({ error: "Authentication required" });
+      }
+
+      // Verify project exists and user owns it
+      const existingProject = await storage.getProject(req.params.id);
+      if (!existingProject) {
+        return res.status(404).json({ error: "Project not found" });
+      }
+      if (existingProject.userId !== req.session.userId) {
+        return res.status(403).json({ error: "Access denied" });
+      }
+
       const deleted = await storage.deleteProject(req.params.id);
       if (!deleted) {
         return res.status(404).json({ error: "Project not found" });
