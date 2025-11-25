@@ -109,10 +109,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "Prompt is required" });
       }
 
+      if (prompt.trim().length === 0) {
+        return res.status(400).json({ error: "Prompt cannot be empty" });
+      }
+
       const code = await generateCode(prompt, type || "website");
       res.json({ code });
     } catch (error: any) {
       console.error("Code generation error:", error);
+      if (error.message?.includes("OpenAI API key")) {
+        return res.status(503).json({ 
+          error: "AI code generation is not configured. Please add OPENAI_API_KEY to your environment variables." 
+        });
+      }
       res.status(500).json({ error: error.message || "Failed to generate code" });
     }
   });
@@ -153,6 +162,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!req.session?.userId) {
         return res.status(401).json({ error: "Authentication required" });
       }
+      
+      // Validate project name
+      if (!req.body.name || req.body.name.trim().length === 0) {
+        return res.status(400).json({ error: "Project name is required" });
+      }
+      
       const validatedData = insertProjectSchema.parse(req.body);
       const project = await storage.createProject(req.session.userId, validatedData);
       res.status(201).json(project);
