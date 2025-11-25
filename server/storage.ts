@@ -70,6 +70,10 @@ export class DbStorage implements IStorage {
   }
 
   // Projects
+  async getProjects(): Promise<Project[]> {
+    return await db.select().from(projects).orderBy(desc(projects.lastModified));
+  }
+
   async getProjectsByUser(userId: string): Promise<Project[]> {
     return await db.select().from(projects).where(eq(projects.userId, userId)).orderBy(desc(projects.lastModified));
   }

@@ -25,15 +25,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "Email already registered" });
       }
 
+      const bcrypt = await import("bcryptjs");
+      const passwordHash = await bcrypt.hash(password, 10);
+
       const user = await storage.createUser({
         email,
-        password,
+        passwordHash,
         displayName: displayName || email.split("@")[0],
         username: email.split("@")[0] + "_" + Math.random().toString(36).substring(7),
       });
 
+      const { passwordHash: _, ...userWithoutPassword } = user;
       req.session = { userId: user.id };
-      res.status(201).json(user);
+      res.status(201).json(userWithoutPassword);
     } catch (error: any) {
       console.error("Signup error:", error);
       res.status(500).json({ error: error.message || "Signup failed" });
@@ -116,7 +120,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Projects CRUD
   app.get("/api/projects", async (req, res) => {
     try {
-      const projects = await storage.getProjects();
+      if (!req.session?.userId) {
+        return res.status(401).json({ error: "Authentication required" });
+      }
+      const projects = await storage.getProjectsByUser(req.session.userId);
       res.json(projects);
     } catch (error: any) {
       res.status(500).json({ error: error.message });
@@ -137,8 +144,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/projects", async (req, res) => {
     try {
+      if (!req.session?.userId) {
+        return res.status(401).json({ error: "Authentication required" });
+      }
       const validatedData = insertProjectSchema.parse(req.body);
-      const project = await storage.createProject(validatedData);
+      const project = await storage.createProject(req.session.userId, validatedData);
       res.status(201).json(project);
     } catch (error: any) {
       if (error instanceof z.ZodError) {
